@@ -19,8 +19,8 @@ class Atbash(BaseCipher):
         :return: возвращает сообщение закодированное методом Атбаш
         """
         result: str = ''
-        is_encoded: bool = False
         for char in self.message:
+            is_encoded: bool = False
             for alphabet in alphabets.values():
                 if char in alphabet:
                     result += alphabet[::-1][alphabet.find(char)]
@@ -35,8 +35,8 @@ class Atbash(BaseCipher):
         :return: возвращает сообщение декодированное методом Атбаш
         """
         result: str = ''
-        is_decoded: bool = False
         for char in self.message:
+            is_decoded: bool = False
             for alphabet in alphabets.values():
                 if char in alphabet:
                     result += alphabet[::-1][alphabet.find(char)]
