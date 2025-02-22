@@ -1,1 +1,1 @@
-#This is repository for SibFU cryptography course
+#This repository is for SibFU cryptography course
