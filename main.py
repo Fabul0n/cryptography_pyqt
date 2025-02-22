@@ -12,6 +12,7 @@ from PyQt6.QtWidgets import (
     QTextEdit,
 )
 from widgets.atbash import AtbashWidget
+from widgets.caesar import CaesarWidget
 
 class CipherApp(QMainWindow):
     def __init__(self):
@@ -27,6 +28,7 @@ class CipherApp(QMainWindow):
 
         self.cipher_combo = QComboBox()
         self.cipher_combo.addItem("Атбаш")
+        self.cipher_combo.addItem("Цезарь")
         layout.addWidget(self.cipher_combo)
 
         self.select_button = QPushButton("Выбрать")
@@ -39,10 +41,18 @@ class CipherApp(QMainWindow):
     def show_cipher_window(self):
         cipher_name = self.cipher_combo.currentText()
 
-        if cipher_name == "Атбаш":
-            self.cipher_window = AtbashWidget()
+        match cipher_name:
+            case 'Атбаш':
+                self.cipher_widget = AtbashWidget()
+            case 'Цезарь':
+                self.cipher_widget = CaesarWidget()
+            case _:
+                e = Exception()
+                e.add_note('Error in cipher name')
+                raise e
+        
 
-        self.cipher_window.show()
+        self.cipher_widget.show()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

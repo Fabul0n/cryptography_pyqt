@@ -6,9 +6,13 @@ class BaseCipher(ABC):
         pass
 
     @abstractmethod
+    def set_key(self, key):
+        pass
+
+    @abstractmethod
     def set_message(self, message: str):
         pass
-    
+
     @abstractmethod
     def encode(self):
         pass
