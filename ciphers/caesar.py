@@ -17,8 +17,8 @@ class Caesar(BaseCipher):
         :return: возвращает сообщение закодированное методом Цезаря
         """
         result: str = ''
-        is_encoded: bool = False
         for char in self.message:
+            is_encoded: bool = False
             for alphabet in alphabets.values():
                 if char in alphabet:
                     result += alphabet[(alphabet.find(char) + self.key) % len(alphabet)]
@@ -33,8 +33,8 @@ class Caesar(BaseCipher):
         :return: возвращает сообщение декодированное методом Цезаря
         """
         result: str = ''
-        is_decoded: bool = False
         for char in self.message:
+            is_decoded: bool = False
             for alphabet in alphabets.values():
                 if char in alphabet:
                     result += alphabet[(alphabet.find(char) - self.key) % len(alphabet)]
