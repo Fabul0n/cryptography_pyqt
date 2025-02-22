@@ -34,6 +34,9 @@ class Richelieu(BaseCipher):
             raise ValueError
         
     def _validate_key(self):
+        for _ in self.key:
+            if _ not in '()0123456789,':
+                raise ValueError
         ls = self.key.split(')')
         left_bracket_count = 0
         char_count1 = 0
@@ -57,7 +60,7 @@ class Richelieu(BaseCipher):
                     char_count2 += 1
                     break
 
-        if char_count1 != char_count2:
+        if char_count1 > char_count2:
             raise ValueError
 
     def encode(self):
@@ -75,6 +78,7 @@ class Richelieu(BaseCipher):
             for _ in part:
                 subresult += all_chars[indent + _ - 1]
             indent += len(part)
+        subresult += all_chars[len(subresult):]
         i = 0
         for char in self.message:
             is_encoded = False
@@ -103,6 +107,7 @@ class Richelieu(BaseCipher):
             for i in range(len(part)):
                 subresult += all_chars[indent + part.index(i+1)]
             indent += len(part)
+        subresult += all_chars[len(subresult):]
         i = 0
         for char in self.message:
             is_encoded = False
