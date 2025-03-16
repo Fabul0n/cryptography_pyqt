@@ -67,6 +67,7 @@ class Richelieu(BaseCipher):
             for _ in part:
                 result += self.message[indent + _ - 1]
             indent += len(part)
+        result += self.message[indent:]
         return result
     
     def decode(self):
