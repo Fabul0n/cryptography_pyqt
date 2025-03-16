@@ -27,6 +27,7 @@ class Gronsfeld(BaseCipher):
         return result
             
     def decode(self):
+        self.key = self.key * (len(self.message) // len(self.key)) + self.key[:len(self.message) % len(self.key)]
         result = ''
         for i, char in enumerate(self.message):
             is_decoded = 0
