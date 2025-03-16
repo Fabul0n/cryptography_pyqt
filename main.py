@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import (
 from widgets.atbash import AtbashWidget
 from widgets.caesar import CaesarWidget
 from widgets.richelieu import RichelieuWidget
+from widgets.gronsfeld import GronsfelduWidget
 
 class CipherApp(QMainWindow):
     def __init__(self):
@@ -31,6 +32,7 @@ class CipherApp(QMainWindow):
         self.cipher_combo.addItem("Атбаш")
         self.cipher_combo.addItem("Цезарь")
         self.cipher_combo.addItem("Ришелье")
+        self.cipher_combo.addItem("Гронсфельд")
         layout.addWidget(self.cipher_combo)
 
         self.select_button = QPushButton("Выбрать")
@@ -50,6 +52,8 @@ class CipherApp(QMainWindow):
                 self.cipher_widget = CaesarWidget()
             case 'Ришелье':
                 self.cipher_widget = RichelieuWidget()
+            case 'Гронсфельд':
+                self.cipher_widget = GronsfelduWidget()
             case _:
                 e = Exception()
                 e.add_note('Error in cipher name')
