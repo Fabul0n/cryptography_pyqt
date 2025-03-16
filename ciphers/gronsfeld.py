@@ -30,8 +30,6 @@ class Gronsfeld(BaseCipher):
         
         return result
             
-
-    
     def decode(self):
         self._validate_key()
         result = ''
