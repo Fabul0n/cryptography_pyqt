@@ -12,12 +12,8 @@ class Gronsfeld(BaseCipher):
     def set_message(self, message: str):
         self.message = message
 
-    def _validate_key(self):
-        if len(self.message) != len(str(self.key)):
-            raise ValueError
-
     def encode(self):
-        self._validate_key()
+        self.key = self.key * (len(self.message)//len(self.key)) + self.key[:len(self.message)%len(self.key)]
         result = ''
         for i, char in enumerate(self.message):
             is_encoded = 0
@@ -31,7 +27,6 @@ class Gronsfeld(BaseCipher):
         return result
             
     def decode(self):
-        self._validate_key()
         result = ''
         for i, char in enumerate(self.message):
             is_decoded = 0
