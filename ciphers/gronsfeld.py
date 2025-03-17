@@ -18,11 +18,13 @@ class Gronsfeld(BaseCipher):
     def encode(self):
         self._validate_key()
         result = ''
-        for i, char in enumerate(self.message):
+        i = 0
+        for char in self.message:
             is_encoded = 0
             for alphabet in alphabets.values():
                 if char in alphabet:
                     result += alphabet[(alphabet.find(char) + int(self.key[i % len(self.key)])) % len(alphabet)]
+                    i += 1
                     is_encoded = 1
             if not is_encoded:
                 result += char
