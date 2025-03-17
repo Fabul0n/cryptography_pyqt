@@ -13,8 +13,7 @@ class Gronsfeld(BaseCipher):
         self.message = message
 
     def _validate_key(self):
-        if len(self.message) != len(str(self.key)):
-            raise ValueError
+        pass
 
     def encode(self):
         self._validate_key()
@@ -23,7 +22,7 @@ class Gronsfeld(BaseCipher):
             is_encoded = 0
             for alphabet in alphabets.values():
                 if char in alphabet:
-                    result += alphabet[(alphabet.find(char) + int(self.key[i])) % len(alphabet)]
+                    result += alphabet[(alphabet.find(char) + int(self.key[i % len(self.key)])) % len(alphabet)]
                     is_encoded = 1
             if not is_encoded:
                 result += char
@@ -37,7 +36,7 @@ class Gronsfeld(BaseCipher):
             is_decoded = 0
             for alphabet in alphabets.values():
                 if char in alphabet:
-                    result += alphabet[(alphabet.find(char) - int(self.key[i])) % len(alphabet)]
+                    result += alphabet[(alphabet.find(char) - int(self.key[i % len(self.key)])) % len(alphabet)]
                     is_decoded = 1
                     break
             if not is_decoded:
