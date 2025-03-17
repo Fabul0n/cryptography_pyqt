@@ -25,13 +25,15 @@ class Vigenere(BaseCipher):
     def encode(self):
         self._validate_key()
         result = ''
-        for i, char in enumerate(self.message):
+        i = 0
+        for char in self.message:
             is_encoded = 0
             for char_alphabet in alphabets.values():
                 if char in char_alphabet:
                     for key_alphabet in alphabets.values():
                         if self.key[i % len(self.key)] in key_alphabet:
                             result += char_alphabet[(char_alphabet.find(char) + key_alphabet.find(self.key[i%len(self.key)])) % len(char_alphabet)]
+                            i += 1
                             is_encoded = 1
                             break
                     if is_encoded:
@@ -44,7 +46,8 @@ class Vigenere(BaseCipher):
     def decode(self):
         self._validate_key()
         result = ''
-        for i, char in enumerate(self.message):
+        i = 0
+        for char in self.message:
             is_encoded = 0
             for char_alphabet in alphabets.values():
                 if char in char_alphabet:
@@ -52,6 +55,7 @@ class Vigenere(BaseCipher):
                         if self.key[i % len(self.key)] in key_alphabet:
                             result += char_alphabet[(char_alphabet.find(char) - key_alphabet.find(self.key[i%len(self.key)])) % len(char_alphabet)]
                             is_encoded = 1
+                            i += 1
                             break
                     if is_encoded:
                         break

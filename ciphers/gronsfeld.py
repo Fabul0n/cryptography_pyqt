@@ -34,12 +34,14 @@ class Gronsfeld(BaseCipher):
     def decode(self):
         self._validate_key()
         result = ''
-        for i, char in enumerate(self.message):
+        i = 0
+        for char in self.message:
             is_decoded = 0
             for alphabet in alphabets.values():
                 if char in alphabet:
                     result += alphabet[(alphabet.find(char) - int(self.key[i % len(self.key)])) % len(alphabet)]
                     is_decoded = 1
+                    i += 1
                     break
             if not is_decoded:
                 result += char
