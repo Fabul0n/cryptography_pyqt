@@ -28,6 +28,8 @@ class Playfair(BaseCipher):
             for j in range(15):
                 tmp_list.append(new_key[i*15+j])
             self.key.append(tmp_list)
+        for _ in self.key:
+            print(*_)
 
     def set_message(self, message: str):
         self.message = message
