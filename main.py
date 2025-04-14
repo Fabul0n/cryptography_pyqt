@@ -17,6 +17,7 @@ from widgets.richelieu import RichelieuWidget
 from widgets.gronsfeld import GronsfelduWidget
 from widgets.vigenere import VigenereWidget
 from widgets.playfair import PlayfairWidget
+from widgets.frequency_analyser import FrequencyAnalyzerWidget
 
 class CipherApp(QMainWindow):
     def __init__(self):
@@ -37,6 +38,7 @@ class CipherApp(QMainWindow):
         self.cipher_combo.addItem("Гронсфельд")
         self.cipher_combo.addItem("Виженер")
         self.cipher_combo.addItem("Плейфер")
+        self.cipher_combo.addItem("Частотный анализатор")
         layout.addWidget(self.cipher_combo)
 
         self.select_button = QPushButton("Выбрать")
@@ -62,6 +64,8 @@ class CipherApp(QMainWindow):
                 self.cipher_widget = VigenereWidget()
             case 'Плейфер':
                 self.cipher_widget = PlayfairWidget()
+            case 'Частотный анализатор':
+                self.cipher_widget = FrequencyAnalyzerWidget()
             case _:
                 e = Exception()
                 e.add_note('Error in cipher name')
