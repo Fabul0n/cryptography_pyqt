@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                             QTextEdit, QPushButton, QFileDialog, QMessageBox)
 from ciphers.gamma import Gamma
 
-class CryptoWidget(QMainWindow):
+class GammaWidget(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Gamma Cipher Widget")
@@ -14,7 +14,6 @@ class CryptoWidget(QMainWindow):
         layout = QVBoxLayout(central_widget)
         
         self.text_edit = QTextEdit()
-        self.text_edit.setPlaceholderText("Введите текст для шифрования/расшифрования")
         
         self.encrypt_btn = QPushButton("Зашифровать")
         self.decrypt_btn = QPushButton("Расшифровать")
@@ -90,7 +89,7 @@ class CryptoWidget(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    window = CryptoWidget()
+    window = GammaWidget()
     window.show()
     sys.exit(app.exec())
 

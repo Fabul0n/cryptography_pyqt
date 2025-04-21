@@ -17,7 +17,6 @@ class FrequencyAnalyzerWidget(QWidget):
         super().__init__()
         self.init_ui()
         
-        # Теоретические вероятности для языков
         self.theoretical_probs = {
             'Русский': {
                 'о': 0.1097, 'е': 0.0845, 'а': 0.0801, 'и': 0.0735, 'н': 0.0670,
@@ -38,7 +37,6 @@ class FrequencyAnalyzerWidget(QWidget):
             }
         }
 
-        # Алфавиты для фильтрации и отображения
         self.alphabets = {
             'Русский': 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя',
             'Английский': 'abcdefghijklmnopqrstuvwxyz'
@@ -50,7 +48,6 @@ class FrequencyAnalyzerWidget(QWidget):
 
         main_layout = QVBoxLayout()
 
-        # Кнопки выбора типа анализа
         btn_layout = QHBoxLayout()
         self.analyze_text_btn = QPushButton('Проанализировать введенный текст')
         self.analyze_file_btn = QPushButton('Проанализировать текст из файла')
@@ -60,7 +57,6 @@ class FrequencyAnalyzerWidget(QWidget):
         btn_layout.addWidget(self.analyze_file_btn)
         main_layout.addLayout(btn_layout)
 
-        # Основной виджет для анализа
         self.analyzer_widget = QWidget()
         self.analyzer_layout = QVBoxLayout()
         self.analyzer_widget.setLayout(self.analyzer_layout)
@@ -71,23 +67,19 @@ class FrequencyAnalyzerWidget(QWidget):
     def show_text_analyzer(self):
         self.clear_analyzer()
         
-        # Выбор языка
         self.language_combo = QComboBox()
         self.language_combo.addItems(['', 'Русский', 'Английский'])
         self.analyzer_layout.addWidget(QLabel('Выберите язык:'))
         self.analyzer_layout.addWidget(self.language_combo)
 
-        # Поле для текста
         self.text_input = QTextEdit()
         self.analyzer_layout.addWidget(QLabel('Введите текст:'))
         self.analyzer_layout.addWidget(self.text_input)
 
-        # Кнопка анализа
         self.analyze_btn = QPushButton('Анализ')
         self.analyze_btn.clicked.connect(self.perform_analysis)
         self.analyzer_layout.addWidget(self.analyze_btn)
 
-        # Поле для расшифрованного текста
         self.decrypted_text = QTextEdit()
         self.decrypted_text.setReadOnly(True)
         self.analyzer_layout.addWidget(QLabel('Расшифрованный текст:'))
@@ -96,23 +88,19 @@ class FrequencyAnalyzerWidget(QWidget):
     def show_file_analyzer(self):
         self.clear_analyzer()
         
-        # Выбор языка
         self.language_combo = QComboBox()
         self.language_combo.addItems(['', 'Русский', 'Английский'])
         self.analyzer_layout.addWidget(QLabel('Выберите язык:'))
         self.analyzer_layout.addWidget(self.language_combo)
 
-        # Кнопка выбора файла
         self.file_btn = QPushButton('Выбрать файл')
         self.file_btn.clicked.connect(self.choose_file)
         self.analyzer_layout.addWidget(self.file_btn)
 
-        # Кнопка анализа
         self.analyze_btn = QPushButton('Анализ')
         self.analyze_btn.clicked.connect(self.perform_analysis)
         self.analyzer_layout.addWidget(self.analyze_btn)
 
-        # Поле для расшифрованного текста
         self.decrypted_text = QTextEdit()
         self.decrypted_text.setReadOnly(True)
         self.analyzer_layout.addWidget(QLabel('Расшифрованный текст:'))
@@ -150,7 +138,6 @@ class FrequencyAnalyzerWidget(QWidget):
             QMessageBox.warning(self, 'Ошибка', 'Текст не может быть пустым!')
             return
 
-        # Фильтрация букв согласно выбранному языку
         alphabet = set(self.alphabets[language])
         counter = Counter(c.lower() for c in text if c.lower() in alphabet)
         total = sum(counter.values())
@@ -159,23 +146,19 @@ class FrequencyAnalyzerWidget(QWidget):
             return
         empirical_probs = {char: count/total for char, count in counter.items()}
 
-        # Создание диалогового окна с таблицей
         dialog = QDialog(self)
         dialog.setWindowTitle('Результаты анализа')
         dialog.resize(1200, 600)
         layout = QHBoxLayout()
 
-        # Таблица
         table = QTableWidget()
         table.setColumnCount(4)
         table.setHorizontalHeaderLabels(['Буква', 'Теор. вероятность', 'Эмпир. вероятность', 'Замена'])
         table.setRowCount(len(self.alphabets[language]))
 
-        # Словарь для хранения данных строк
         self.table_data = []
         substitution = self.calculate_substitution(language, empirical_probs)
 
-        # Заполнение таблицы всеми буквами алфавита
         for char in self.alphabets[language]:
             theor_prob = self.theoretical_probs[language].get(char, 0)
             emp_prob = empirical_probs.get(char, 0)
@@ -187,14 +170,11 @@ class FrequencyAnalyzerWidget(QWidget):
                 'subst_char': subst_char
             })
 
-        # Заполнение таблицы
         self.update_table(table)
 
-        # Включение редактирования столбца "Замена"
         table.setEditTriggers(QTableWidget.EditTrigger.DoubleClicked)
         table.cellChanged.connect(lambda row, col: self.on_cell_changed(row, col, table, substitution, language))
 
-        # Кнопка сортировки
         sort_btn = QPushButton('Сортировать по эмпир. вероятности')
         sort_btn.clicked.connect(lambda: self.on_sort(table))
         right_layout = QVBoxLayout()
@@ -202,7 +182,6 @@ class FrequencyAnalyzerWidget(QWidget):
 
         layout.addWidget(table)
 
-        # Картинка
         plt.bar(empirical_probs.keys(), empirical_probs.values())
 
         plt.title("Вероятности букв в тексте", fontsize=14)
@@ -212,7 +191,6 @@ class FrequencyAnalyzerWidget(QWidget):
         canvas = FigureCanvas(plt.gcf())
         right_layout.addWidget(canvas)
 
-        # Кнопка расшифровки
         decrypt_btn = QPushButton('Расшифровать')
         decrypt_btn.clicked.connect(lambda: self.decrypt_text(text, substitution, dialog))
         right_layout.addWidget(decrypt_btn)
@@ -229,7 +207,6 @@ class FrequencyAnalyzerWidget(QWidget):
             table.setItem(i, 1, QTableWidgetItem(f"{data['theor_prob']:.4f}"))
             table.setItem(i, 2, QTableWidgetItem(f"{data['emp_prob']:.4f}"))
             table.setItem(i, 3, QTableWidgetItem(data['subst_char']))
-            # Отключаем редактирование первых трех столбцов
             for col in range(3):
                 item = table.item(i, col)
                 item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
@@ -238,30 +215,25 @@ class FrequencyAnalyzerWidget(QWidget):
     def on_sort(self, table):
         """Сортирует таблицу по эмпирическим вероятностям"""
         table.blockSignals(True)
-        # Сортируем self.table_data по эмпирическим вероятностям (по убыванию)
         self.table_data.sort(key=lambda x: x['emp_prob'], reverse=True)
-        # Обновляем таблицу
         self.update_table(table)
         table.blockSignals(False)
 
     def on_cell_changed(self, row, col, table, substitution, language):
-        if col != 3:  # Изменения только в столбце "Замена"
+        if col != 3:
             return
 
         table.blockSignals(True)
 
-        # Получаем текущую букву из таблицы
         original_char = self.table_data[row]['char']
         new_char = table.item(row, col).text().lower()
 
-        # Проверка валидности введенной буквы
         if new_char and (new_char not in self.alphabets[language] or len(new_char) > 1):
             QMessageBox.warning(self, 'Ошибка', f'Введите одну букву из алфавита {language.lower()} языка!')
             table.setItem(row, col, QTableWidgetItem(self.table_data[row]['subst_char']))
             table.blockSignals(False)
             return
 
-        # Если новая буква уже используется, делаем свап
         if new_char and new_char != self.table_data[row]['subst_char']:
             for data in self.table_data:
                 if data['char'] != original_char and data['subst_char'] == new_char:
@@ -269,25 +241,20 @@ class FrequencyAnalyzerWidget(QWidget):
                     substitution[data['char']] = self.table_data[row]['subst_char']
                     break
 
-        # Обновляем данные и словарь замен
         self.table_data[row]['subst_char'] = new_char if new_char else self.table_data[row]['subst_char']
         substitution[original_char] = new_char if new_char else self.table_data[row]['subst_char']
 
-        # Обновляем таблицу
         self.update_table(table)
 
         table.blockSignals(False)
 
     def calculate_substitution(self, language, empirical_probs):
-        # Создаем биективное отображение
         alphabet = list(self.alphabets[language])
-        substitution = {char: char for char in alphabet}  # Инициализация тождественным отображением
+        substitution = {char: char for char in alphabet}
         
-        # Сортируем эмпирические и теоретические вероятности
         theoretical = sorted(self.theoretical_probs[language].items(), key=lambda x: x[1], reverse=True)
         empirical = sorted(empirical_probs.items(), key=lambda x: x[1], reverse=True)
         
-        # Сопоставляем буквы по вероятностям
         used_theoretical = set()
         for emp_char, emp_prob in empirical:
             if emp_char in alphabet:
@@ -300,7 +267,6 @@ class FrequencyAnalyzerWidget(QWidget):
                             min_diff = diff
                             best_theor_char = theor_char
                 if best_theor_char != emp_char:
-                    # Находим текущую замену best_theor_char
                     for c in substitution:
                         if substitution[c] == best_theor_char and c != emp_char:
                             substitution[c] = substitution[emp_char]
