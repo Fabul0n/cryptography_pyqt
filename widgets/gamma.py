@@ -1,6 +1,6 @@
 import sys
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
-                            QTextEdit, QPushButton, QFileDialog, QMessageBox)
+                            QTextEdit, QPushButton, QFileDialog, QMessageBox, QComboBox, QLabel)
 from ciphers.gamma import Gamma
 
 class GammaWidget(QMainWindow):
@@ -21,6 +21,10 @@ class GammaWidget(QMainWindow):
         self.save_btn = QPushButton("Сохранить в файл")
         
         layout.addWidget(self.text_edit)
+        self.language_combo = QComboBox()
+        self.language_combo.addItems(['', 'Файл', 'Ввод'])
+        layout.addWidget(QLabel('Выберите режим:'))
+        layout.addWidget(self.language_combo)
         layout.addWidget(self.encrypt_btn)
         layout.addWidget(self.decrypt_btn)
         layout.addWidget(self.load_btn)
@@ -30,19 +34,37 @@ class GammaWidget(QMainWindow):
         self.decrypt_btn.clicked.connect(self.decrypt)
         self.load_btn.clicked.connect(self.load_file)
         self.save_btn.clicked.connect(self.save_file)
+        self.file_text = None
 
     def encrypt(self):
-        text = self.text_edit.toPlainText()
+        mode = self.language_combo.currentText()
+        if not mode:
+            QMessageBox.warning(self, 'Ошибка', 'Пожалуйста, выберите режим!')
+            return
+        if mode == 'Ввод':
+            text = self.text_edit.toPlainText()
+        else:
+            text = self.file_text
         if not text:
             QMessageBox.warning(self, "Ошибка", "Введите текст для шифрования")
             return
             
         cipher = Gamma(text)
         encrypted = cipher.encode()
-        self.text_edit.setText(encrypted)
+        if mode == 'Ввод':
+            self.text_edit.setText(encrypted)
+        else:
+            self.text_edit.setText('Файл зашифрован')
 
     def decrypt(self):
-        text = self.text_edit.toPlainText()
+        mode = self.language_combo.currentText()
+        if not mode:
+            QMessageBox.warning(self, 'Ошибка', 'Пожалуйста, выберите режим!')
+            return
+        if mode == 'Ввод':
+            text = self.text_edit.toPlainText()
+        else:
+            text = self.file_text
         if not text:
             QMessageBox.warning(self, "Ошибка", "Введите текст для расшифрования")
             return
@@ -50,10 +72,13 @@ class GammaWidget(QMainWindow):
         try:
             cipher = Gamma(text)
             decrypted = cipher.decode()
-            try:
-                self.text_edit.setText(decrypted.decode('utf-8'))
-            except UnicodeDecodeError:
-                self.text_edit.setText(decrypted.hex())
+            if mode == 'Ввод':
+                try:
+                    self.text_edit.setText(decrypted.decode('utf-8'))
+                except UnicodeDecodeError:
+                    self.text_edit.setText(decrypted.hex())
+            else:
+                self.text_edit.setText('Файл расшифрован')
         except ValueError:
             QMessageBox.warning(self, "Ошибка", "Неверный формат зашифрованного текста")
 
@@ -65,12 +90,12 @@ class GammaWidget(QMainWindow):
             try:
                 with open(file_name, 'rb') as f:
                     data = f.read()
-                self.text_edit.setText(data.hex())
+                self.file_text = data.hex()
             except Exception as e:
                 QMessageBox.critical(self, "Ошибка", f"Не удалось открыть файл: {str(e)}")
 
     def save_file(self):
-        text = self.text_edit.toPlainText()
+        text = self.file_text
         if not text:
             QMessageBox.warning(self, "Ошибка", "Нет данных для сохранения")
             return
