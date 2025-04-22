@@ -1,7 +1,67 @@
 import sys
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
-                            QTextEdit, QPushButton, QFileDialog, QMessageBox, QComboBox, QLabel)
+                            QTextEdit, QPushButton, QFileDialog, QMessageBox, QComboBox, QLabel, QDialog, QLineEdit,
+                            QHBoxLayout)
+from PyQt6 import QtGui
+from PyQt6 import QtCore
 from ciphers.gamma import Gamma
+
+class LCGSettingsDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Настройки Линейного Конгруэнтного Генератора")
+        self.resize(400, 200)
+
+        main_layout = QVBoxLayout()
+
+        self.seedLabel = QLabel("Начальное значение (зерно):", self)
+        main_layout.addWidget(self.seedLabel)
+
+        self.seedEdit = QLineEdit(self)
+        main_layout.addWidget(self.seedEdit)
+
+        self.aLabel = QLabel("Множитель (a):", self)
+        main_layout.addWidget(self.aLabel)
+
+        self.aEdit = QLineEdit(self)
+        main_layout.addWidget(self.aEdit)
+
+        self.cLabel = QLabel("Слагаемое (c):", self)
+        main_layout.addWidget(self.cLabel)
+
+        self.cEdit = QLineEdit(self)
+        main_layout.addWidget(self.cEdit)
+
+        self.mLabel = QLabel("Модуль (m):", self)
+        main_layout.addWidget(self.mLabel)
+
+        self.mEdit = QLineEdit(self)
+        main_layout.addWidget(self.mEdit)
+
+        button_layout = QHBoxLayout()
+
+        button_layout.addStretch(1)
+
+        self.okButton = QPushButton("OK", self)
+        self.okButton.clicked.connect(self.accept)
+        button_layout.addWidget(self.okButton)
+
+        self.cancelButton = QPushButton("Отмена", self)
+        self.cancelButton.clicked.connect(self.reject)
+        button_layout.addWidget(self.cancelButton)
+
+        button_layout.addStretch(1)
+
+        main_layout.addLayout(button_layout)
+
+        self.setLayout(main_layout)
+
+    def get_settings(self):
+        seed = int(self.seedEdit.text())
+        a = int(self.aEdit.text())
+        c = int(self.cEdit.text())
+        m = int(self.mEdit.text())
+        return seed, a, c, m
 
 class GammaWidget(QMainWindow):
     def __init__(self):
@@ -20,6 +80,8 @@ class GammaWidget(QMainWindow):
         self.load_btn = QPushButton("Загрузить из файла")
         self.save_btn = QPushButton("Сохранить в файл")
         
+        self.conf_gen = QPushButton("Редактировать конфиг")
+        layout.addWidget(self.conf_gen)
         layout.addWidget(self.text_edit)
         self.language_combo = QComboBox()
         self.language_combo.addItems(['', 'Файл', 'Ввод'])
@@ -29,12 +91,27 @@ class GammaWidget(QMainWindow):
         layout.addWidget(self.decrypt_btn)
         layout.addWidget(self.load_btn)
         layout.addWidget(self.save_btn)
+        self.seed = 2281337
+        self.a = 1103515245
+        self.c = 12345
+        self.m = 2**64
         
+        self.conf_gen.clicked.connect(self.configure_lcg)
         self.encrypt_btn.clicked.connect(self.encrypt)
         self.decrypt_btn.clicked.connect(self.decrypt)
         self.load_btn.clicked.connect(self.load_file)
         self.save_btn.clicked.connect(self.save_file)
         self.file_text = None
+
+    def configure_lcg(self):
+        dialog = LCGSettingsDialog(self)
+        dialog.seedEdit.setText(str(self.seed))
+        dialog.aEdit.setText(str(self.a))
+        dialog.cEdit.setText(str(self.c))
+        dialog.mEdit.setText(str(self.m))
+
+        if dialog.exec():
+            self.seed, self.a, self.c, self.m = dialog.get_settings()
 
     def encrypt(self):
         mode = self.language_combo.currentText()
@@ -49,7 +126,7 @@ class GammaWidget(QMainWindow):
             QMessageBox.warning(self, "Ошибка", "Введите текст для шифрования")
             return
             
-        cipher = Gamma(text)
+        cipher = Gamma(text, self.seed, self.a, self.c, self.m)
         encrypted = cipher.encode()
         if mode == 'Ввод':
             self.text_edit.setText(encrypted)
@@ -70,7 +147,7 @@ class GammaWidget(QMainWindow):
             return
             
         try:
-            cipher = Gamma(text)
+            cipher = Gamma(text, self.seed, self.a, self.c, self.m)
             decrypted = cipher.decode()
             if mode == 'Ввод':
                 try:

@@ -1,16 +1,19 @@
 from ciphers.base import BaseCipher
 
 class RandGen:
-    def __init__(self, seed = 2281337):
+    def __init__(self, seed = 2281337, a = 1103515245, c = 12345, m = 2**64):
         self.seed = seed
+        self.a = a
+        self.c = c
+        self.m = m
         
     def gen(self):
-        self.seed = (self.seed * 1103515245 + 12345) % 2**64
+        self.seed = (self.seed * self.a + self.c) % self.m
         return (self.seed//65536)
 
 class Gamma(BaseCipher):
-    def __init__(self, message):
-        self.random = RandGen()
+    def __init__(self, message, seed = 2281337, a = 1103515245, c = 12345, m = 2**64):
+        self.random = RandGen(seed, a, c, m)
         self.message: str = message
 
     def set_key(self):
