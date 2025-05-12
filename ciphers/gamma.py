@@ -9,7 +9,7 @@ class RandGen:
         
     def gen(self):
         self.seed = (self.seed * self.a + self.c) % self.m
-        return (self.seed//65536)
+        return self.seed#(self.seed//65536)
 
 class Gamma(BaseCipher):
     def __init__(self, message, seed = 2281337, a = 1103515245, c = 12345, m = 2**64):
