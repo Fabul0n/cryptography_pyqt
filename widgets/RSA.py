@@ -208,7 +208,7 @@ class AliceWindow(QMainWindow):
 
         encrypted = encrypt_bytes(message, bob_public)
         self.message_input.setReadOnly(False)
-        self.message_input.setText(str(encrypted))
+        self.message_input.setText(",".join(map(str, encrypted)))
 
     def send_to_bob(self):
         encrypted_text = self.message_input.toPlainText()
@@ -221,9 +221,9 @@ class AliceWindow(QMainWindow):
     def decrypt_received(self):
         try:
             text = self.message_input.toPlainText()
-            ciphertext = eval(text)
-            if not isinstance(ciphertext, list):
-                raise ValueError("Сообщение не является списком чисел")
+            if not text:
+                raise ValueError("Сообщение пустое")
+            ciphertext = list(map(int, text.split(",")))
             decrypted = decrypt_bytes(ciphertext, self.private_key)
             self.message_input.setText(decrypted)
         except Exception as e:
@@ -309,14 +309,14 @@ class BobWindow(QMainWindow):
 
         encrypted = encrypt_bytes(message, alice_public)
         self.message_input.setReadOnly(False)
-        self.message_input.setText(str(encrypted))
+        self.message_input.setText(",".join(map(str, encrypted)))
 
     def decrypt_received(self):
         try:
             text = self.message_input.toPlainText()
-            ciphertext = eval(text)
-            if not isinstance(ciphertext, list):
-                raise ValueError("Сообщение не является списком чисел")
+            if not text:
+                raise ValueError("Сообщение пустое")
+            ciphertext = list(map(int, text.split(",")))
             decrypted = decrypt_bytes(ciphertext, self.private_key)
             self.message_input.setText(decrypted)
         except Exception as e:
