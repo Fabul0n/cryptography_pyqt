@@ -1,7 +1,8 @@
-test.py
+test*.py
 venv
 __pycache__
 main.spec
 dist
 build
 main.exe
+test.ipynb

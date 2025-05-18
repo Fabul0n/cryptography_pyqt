@@ -20,6 +20,7 @@ from widgets.playfair import PlayfairWidget
 from widgets.frequency_analyser import FrequencyAnalyzerWidget
 from widgets.gamma import GammaWidget
 from widgets.des import DESWidget
+from widgets.RSA import RSAWidget
 
 import random
 
@@ -47,6 +48,7 @@ class CipherApp(QMainWindow):
         self.cipher_combo.addItem("Частотный анализатор")
         self.cipher_combo.addItem("Гаммирование")
         self.cipher_combo.addItem("DES")
+        self.cipher_combo.addItem("RSA")
         layout.addWidget(self.cipher_combo)
 
         self.select_button = QPushButton("Выбрать")
@@ -78,6 +80,8 @@ class CipherApp(QMainWindow):
                 self.cipher_widget = GammaWidget()
             case 'DES':
                 self.cipher_widget = DESWidget()
+            case 'RSA':
+                self.cipher_widget = RSAWidget()
             case _:
                 e = Exception()
                 e.add_note('Error in cipher name')
