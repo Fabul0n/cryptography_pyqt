@@ -131,112 +131,10 @@ class KeyGenerationDialog(QDialog):
         self.accept()
 
 
-class AliceWindow(QMainWindow):
+class UserWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("RSA - Алиса")
-        self.setGeometry(100, 100, 500, 400)
-        self.setMinimumSize(400, 300)
-
-
-        layout = QVBoxLayout()
-
-        self.set_keys_button = QPushButton("Настроить ключи")
-        self.set_keys_button.clicked.connect(self.open_key_dialog)
-        layout.addWidget(self.set_keys_button)
-
-        self.keys_label = QLabel("Ключи не заданы")
-        self.keys_label.setWordWrap(True)
-        layout.addWidget(self.keys_label)
-
-        self.message_label = QLabel("Получено/отправлено сообщение:")
-        self.message_input = QTextEdit()
-        layout.addWidget(self.message_label)
-        layout.addWidget(self.message_input)
-
-        self.encrypt_button = QPushButton("Зашифровать на ключе Боба")
-        self.encrypt_button.clicked.connect(self.encrypt_message)
-        layout.addWidget(self.encrypt_button)
-
-        self.decrypt_button = QPushButton("Расшифровать сообщение")
-        self.decrypt_button.clicked.connect(self.decrypt_received)
-        layout.addWidget(self.decrypt_button)
-
-        self.send_button = QPushButton("Отправить Бобу")
-        self.send_button.clicked.connect(self.send_to_bob)
-        layout.addWidget(self.send_button)
-
-        container = QWidget()
-        container.setLayout(layout)
-        self.setCentralWidget(container)
-
-        self.public_key = None
-        self.private_key = None
-
-    def set_other(self, other):
-        self.other: BobWindow = other
-
-    def open_key_dialog(self):
-        dialog = KeyGenerationDialog(self)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            p, q, e = dialog.get_values()
-            self.generate_rsa_keys(p, q, e)
-            self.keys_label.setText(f"Ключи Алисы: ({self.public_key[0]}, {self.public_key[1]})")
-
-    def generate_rsa_keys(self, p, q, e):
-        phi = (p - 1) * (q - 1)
-        d = mod_inverse(e, phi)
-        if d is None or (e * d) % phi != 1:
-            raise ValueError("Ошибка генерации ключей")
-        self.public_key = (e, p * q)
-        self.private_key = (d, p * q)
-
-    def encrypt_message(self):
-        if not self.public_key:
-            QMessageBox.critical(self, "Ошибка", "Сначала настройте свои ключи!")
-            return
-
-        bob_public = self.other.get_public_key()
-        if not bob_public:
-            QMessageBox.critical(self, "Ошибка", "Не задан открытый ключ Боба!")
-            return
-
-        message = self.message_input.toPlainText()
-        if not message:
-            QMessageBox.critical(self, "Ошибка", "Введите сообщение для шифрования!")
-            return
-
-        encrypted = encrypt_bytes(message, bob_public)
-        self.message_input.setReadOnly(False)
-        self.message_input.setText(",".join(map(str, encrypted)))
-
-    def send_to_bob(self):
-        encrypted_text = self.message_input.toPlainText()
-        self.other.receive_encrypted_message(encrypted_text)
-
-    def receive_encrypted_message(self, encrypted):
-        self.message_input.setReadOnly(False)
-        self.message_input.setText(encrypted)
-
-    def decrypt_received(self):
-        try:
-            text = self.message_input.toPlainText()
-            if not text:
-                raise ValueError("Сообщение пустое")
-            ciphertext = list(map(int, text.split(",")))
-            decrypted = decrypt_bytes(ciphertext, self.private_key)
-            self.message_input.setText(decrypted)
-        except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Ошибка расшифрования: {str(e)}")
-
-    def get_public_key(self):
-        return self.public_key
-
-
-class BobWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("RSA - Боб")
+        self.setWindowTitle("RSA - User")
         self.setGeometry(700, 100, 500, 400)
         self.setMinimumSize(400, 300)
 
@@ -255,7 +153,7 @@ class BobWindow(QMainWindow):
         layout.addWidget(self.message_label)
         layout.addWidget(self.message_input)
 
-        self.encrypt_button = QPushButton("Зашифровать на ключе Алисы")
+        self.encrypt_button = QPushButton("Зашифровать на ключе другого пользователя")
         self.encrypt_button.clicked.connect(self.encrypt_message)
         layout.addWidget(self.encrypt_button)
 
@@ -263,8 +161,8 @@ class BobWindow(QMainWindow):
         self.decrypt_button.clicked.connect(self.decrypt_received)
         layout.addWidget(self.decrypt_button)
 
-        self.send_button = QPushButton("Отправить Алисе")
-        self.send_button.clicked.connect(self.send_to_alice)
+        self.send_button = QPushButton("Отправить другому пользователю")
+        self.send_button.clicked.connect(self.send_to_other)
         layout.addWidget(self.send_button)
 
         container = QWidget()
@@ -275,14 +173,14 @@ class BobWindow(QMainWindow):
         self.private_key = None
 
     def set_other(self, other):
-        self.other: AliceWindow = other
+        self.other: UserWindow = other
 
     def open_key_dialog(self):
         dialog = KeyGenerationDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             p, q, e = dialog.get_values()
             self.generate_rsa_keys(p, q, e)
-            self.keys_label.setText(f"Ключи Боба: ({self.public_key[0]}, {self.public_key[1]})")
+            self.keys_label.setText(f"Ключи пользователя: ({self.public_key[0]}, {self.public_key[1]})")
 
     def generate_rsa_keys(self, p, q, e):
         phi = (p - 1) * (q - 1)
@@ -297,9 +195,9 @@ class BobWindow(QMainWindow):
             QMessageBox.critical(self, "Ошибка", "Сначала настройте свои ключи!")
             return
 
-        alice_public = self.other.get_public_key()
-        if not alice_public:
-            QMessageBox.critical(self, "Ошибка", "Не задан открытый ключ Алисы!")
+        other_public = self.other.get_public_key()
+        if not other_public:
+            QMessageBox.critical(self, "Ошибка", "Не задан открытый ключ другого пользователя!")
             return
 
         message = self.message_input.toPlainText()
@@ -307,7 +205,7 @@ class BobWindow(QMainWindow):
             QMessageBox.critical(self, "Ошибка", "Введите сообщение для шифрования!")
             return
 
-        encrypted = encrypt_bytes(message, alice_public)
+        encrypted = encrypt_bytes(message, other_public)
         self.message_input.setReadOnly(False)
         self.message_input.setText(",".join(map(str, encrypted)))
 
@@ -326,7 +224,7 @@ class BobWindow(QMainWindow):
         self.message_input.setReadOnly(False)
         self.message_input.setText(encrypted)
 
-    def send_to_alice(self):
+    def send_to_other(self):
         encrypted_text = self.message_input.toPlainText()
         self.other.receive_encrypted_message(encrypted_text)
 
@@ -336,8 +234,8 @@ class BobWindow(QMainWindow):
 
 class RSAWidget():
     def __init__(self):
-        self.alice = AliceWindow()
-        self.bob = BobWindow()
+        self.alice = UserWindow()
+        self.bob = UserWindow()
         self.alice.set_other(self.bob)
         self.bob.set_other(self.alice)
 
