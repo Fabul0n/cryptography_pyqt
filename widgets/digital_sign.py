@@ -2,14 +2,12 @@ import sys
 import random
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QPushButton, QTextEdit, QLabel, QVBoxLayout,
-    QWidget, QLineEdit, QMessageBox, QDialog, QFormLayout, QDialogButtonBox
+    QWidget, QLineEdit, QMessageBox, QDialog, QFormLayout, QDialogButtonBox, QFileDialog
 )
 from PyQt6.QtCore import Qt
 from sympy import isprime as is_prime
 from sympy import nextprime
 from math import gcd
-
-from hashlib import sha256
 
 
 def mod_inverse(a, m):
@@ -155,9 +153,13 @@ class UserWindow(QMainWindow):
         layout.addWidget(self.message_label)
         layout.addWidget(self.message_input)
 
-        self.encrypt_button = QPushButton("Получить хэш")
-        self.encrypt_button.clicked.connect(self.hash_message)
-        layout.addWidget(self.encrypt_button)
+        self.hash_button = QPushButton("Получить хэш")
+        self.hash_button.clicked.connect(self.hash_message)
+        layout.addWidget(self.hash_button)
+
+        self.file_hash_button = QPushButton("Получить хэш файла")
+        self.file_hash_button.clicked.connect(self.hash_file)
+        layout.addWidget(self.file_hash_button)
 
         self.hash_label = QLabel("Хэш сообщения:")
         self.hash_input = QTextEdit()
@@ -213,6 +215,18 @@ class UserWindow(QMainWindow):
         
         hashed = hash(message)
         self.hash_input.setText(str(hashed))
+    
+    def hash_file(self):
+        file_name, _ = QFileDialog.getOpenFileName(
+            self, "Открыть файл", "", "Все файлы (*.*)"
+        )
+        if file_name:
+            try:
+                with open(file_name, 'rb') as f:
+                    data = f.read()
+                self.hash_input.setText(str(hash(data)))
+            except Exception as e:
+                QMessageBox.critical(self, "Ошибка", f"Не удалось открыть файл: {str(e)}")
     
     def encrypt_message(self):
         if not self.public_key:
