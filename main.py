@@ -22,6 +22,7 @@ from widgets.gamma import GammaWidget
 from widgets.des import DESWidget
 from widgets.RSA import RSAWidget
 from widgets.keyXchange import DiffieHellman
+from widgets.digital_sign import DigSignWidget
 
 import random
 
@@ -51,6 +52,7 @@ class CipherApp(QMainWindow):
         self.cipher_combo.addItem("DES")
         self.cipher_combo.addItem("RSA")
         self.cipher_combo.addItem("Диффи-Хеллман")
+        self.cipher_combo.addItem("Цифровая подпись")
         layout.addWidget(self.cipher_combo)
 
         self.select_button = QPushButton("Выбрать")
@@ -86,6 +88,8 @@ class CipherApp(QMainWindow):
                 self.cipher_widget = RSAWidget()
             case 'Диффи-Хеллман':
                 self.cipher_widget = DiffieHellman()
+            case 'Цифровая подпись':
+                self.cipher_widget = DigSignWidget()
             case _:
                 e = Exception()
                 e.add_note('Error in cipher name')
