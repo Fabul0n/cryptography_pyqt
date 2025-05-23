@@ -132,9 +132,9 @@ class KeyGenerationDialog(QDialog):
 
 
 class UserWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, name):
         super().__init__()
-        self.setWindowTitle("RSA - User")
+        self.setWindowTitle(f"RSA - {name}")
         self.setGeometry(700, 100, 500, 400)
         self.setMinimumSize(400, 300)
 
@@ -234,8 +234,8 @@ class UserWindow(QMainWindow):
 
 class RSAWidget():
     def __init__(self):
-        self.alice = UserWindow()
-        self.bob = UserWindow()
+        self.alice = UserWindow('Алиса')
+        self.bob = UserWindow('Боб')
         self.alice.set_other(self.bob)
         self.bob.set_other(self.alice)
 
