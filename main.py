@@ -10,6 +10,8 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QMessageBox,
     QTextEdit,
+    QHBoxLayout,
+    QFrame
 )
 from widgets.atbash import AtbashWidget
 from widgets.caesar import CaesarWidget
@@ -23,6 +25,7 @@ from widgets.des import DESWidget
 from widgets.RSA import RSAWidget
 from widgets.keyXchange import DiffieHellman
 from widgets.digital_sign import DigSignWidget
+from widgets.secret_chat.client.client_widget import ClientWidget
 
 import random
 
@@ -35,10 +38,11 @@ class CipherApp(QMainWindow):
         self.setGeometry(100, 100, 400, 300)
 
         main_widget = QWidget()
-        layout = QVBoxLayout()
+        layout = QHBoxLayout()
+        v_layout = QVBoxLayout()
 
         self.cipher_label = QLabel("Выберите шифр:")
-        layout.addWidget(self.cipher_label)
+        v_layout.addWidget(self.cipher_label)
 
         self.cipher_combo = QComboBox()
         self.cipher_combo.addItem("Атбаш")
@@ -53,14 +57,33 @@ class CipherApp(QMainWindow):
         self.cipher_combo.addItem("RSA")
         self.cipher_combo.addItem("Диффи-Хеллман")
         self.cipher_combo.addItem("Цифровая подпись")
-        layout.addWidget(self.cipher_combo)
+        v_layout.addWidget(self.cipher_combo)
 
         self.select_button = QPushButton("Выбрать")
         self.select_button.clicked.connect(self.show_cipher_window)
-        layout.addWidget(self.select_button)
+        v_layout.addWidget(self.select_button)
+
+        layout.addLayout(v_layout)
+
+
+        separator = QFrame()
+        separator.setFrameShape(QFrame.Shape.VLine)
+        separator.setFrameShadow(QFrame.Shadow.Sunken)
+        layout.addWidget(separator)
+
+
+        self.secret_chat_button = QPushButton("Секретный чат")
+        self.secret_chat_button.clicked.connect(self.show_secret_chat)
+        
+        layout.addWidget(self.secret_chat_button)
+
 
         main_widget.setLayout(layout)
         self.setCentralWidget(main_widget)
+
+    def show_secret_chat(self):
+        self.secret_chat = ClientWidget()
+        self.close()
 
     def show_cipher_window(self):
         cipher_name = self.cipher_combo.currentText()
