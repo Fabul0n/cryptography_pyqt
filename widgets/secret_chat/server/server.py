@@ -4,7 +4,6 @@ from typing import List
 
 app = FastAPI()
 
-# Храним активные соединения
 active_connections = []
 
 @app.websocket("/ws")
@@ -22,7 +21,6 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
-            # Пересылаем всем, кроме себя
             for conn in active_connections:
                 if conn != websocket:
                     await conn.send_text(data)
