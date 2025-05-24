@@ -26,6 +26,7 @@ from widgets.RSA import RSAWidget
 from widgets.keyXchange import DiffieHellman
 from widgets.digital_sign import DigSignWidget
 from widgets.secret_chat.client.client_widget import ClientWidget
+from widgets.secret_chat.server.server import ServerGUI
 
 import random
 
@@ -72,17 +73,30 @@ class CipherApp(QMainWindow):
         layout.addWidget(separator)
 
 
-        self.secret_chat_button = QPushButton("Секретный чат")
-        self.secret_chat_button.clicked.connect(self.show_secret_chat)
-        
-        layout.addWidget(self.secret_chat_button)
+        v_layout2 = QVBoxLayout()
 
+        v_layout2.addWidget(QLabel("Секретный чат:"))
+
+        self.secret_chat_client_button = QPushButton("Клиент")
+        self.secret_chat_client_button.clicked.connect(self.secret_chat_client)
+        v_layout2.addWidget(self.secret_chat_client_button)
+
+        self.secret_chat_server_button = QPushButton("Сервер")
+        self.secret_chat_server_button.clicked.connect(self.secret_chat_server)
+        v_layout2.addWidget(self.secret_chat_server_button)
+
+        layout.addLayout(v_layout2)
 
         main_widget.setLayout(layout)
         self.setCentralWidget(main_widget)
 
-    def show_secret_chat(self):
-        self.secret_chat = ClientWidget()
+    def secret_chat_client(self):
+        self.secret_chat_cli = ClientWidget()
+        self.close()
+
+    def secret_chat_server(self):
+        self.secret_chat_srvr = ServerGUI()
+        self.secret_chat_srvr.show()
         self.close()
 
     def show_cipher_window(self):
