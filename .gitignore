@@ -2,7 +2,7 @@ test*.py
 venv
 __pycache__
 main.spec
-dist
-build
+dist/
+build/
 main.exe
 test.ipynb
