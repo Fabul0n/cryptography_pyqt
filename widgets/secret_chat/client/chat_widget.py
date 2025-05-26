@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import (
     QPushButton, QTextEdit, QLabel, QVBoxLayout,
-    QWidget, QMessageBox, QDialog, QLineEdit, QHBoxLayout
+    QWidget, QMessageBox, QDialog, QLineEdit, 
+    QHBoxLayout, QListWidget
 )
 import asyncio
 
@@ -62,6 +63,10 @@ class ChatWidget(QWidget):
         layout.addWidget(self.reciever_key)
         layout.addWidget(self.reciever_key_text)
 
+        layout.addWidget(QLabel("История:"))
+        self.msg_history = QListWidget()
+        layout.addWidget(self.msg_history)
+
         self.message_label = QLabel("Сообщение:")
         self.message_input = QTextEdit()
         layout.addWidget(self.message_label)
@@ -110,6 +115,8 @@ class ChatWidget(QWidget):
         self.websocket_client.key_received.connect(self.set_reciever)
         self.websocket_client.start()
 
+        self.tmp_msg = None
+
     def hash_msg(self):
         if not self.public_key:
             QMessageBox.critical(self, "Ошибка", "Сначала настройте свои ключи!")
@@ -135,6 +142,7 @@ class ChatWidget(QWidget):
 
         if hashed == self.hash_msg():
             QMessageBox.information(self, "Успех!", "Электронная подпись верна!")
+            self.msg_history.addItem(self.message_input.toPlainText())
         else:
             QMessageBox.critical(self, "Ошибка!", "Электронная подпись неверна!")
 
@@ -187,6 +195,7 @@ class ChatWidget(QWidget):
             return
 
         encrypted = encrypt_bytes(message, self.reciever_public_key)
+        self.tmp_msg = message
         self.message_input.setText(",".join(map(str, encrypted)))
 
     def decrypt_received(self):
@@ -201,6 +210,7 @@ class ChatWidget(QWidget):
             QMessageBox.critical(self, "Ошибка", f"Ошибка расшифрования: {str(e)}")
 
     def send_to_other(self):
+        self.msg_history.addItem(self.tmp_msg)
         encrypted_text = self.message_input.toPlainText()
         if not encrypted_text:
             QMessageBox.critical(self, "Ошибка", "Нет сообщения для отправки!")

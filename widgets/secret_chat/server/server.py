@@ -60,15 +60,15 @@ class WebSocketServer(QThread):
 
     def send_stored_message(self):
         if not self.message_queue:
-            self.message_received.emit("❌ Нет сообщений в очереди")
+            self.message_received.emit("Нет сообщений в очереди")
             return
 
         sender, message = self.message_queue.pop(0)
-        self.message_received.emit(f"📤 Передано дальше: {message}")
+        self.message_received.emit(f"Передано дальше: {message}")
 
         recipients = [conn for conn in self.active_connections if conn != sender]
         if not recipients:
-            self.message_received.emit("❌ Нет получателя для сообщения")
+            self.message_received.emit("Нет получателя для сообщения")
             return
 
         recipient = recipients[0]
