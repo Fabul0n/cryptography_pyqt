@@ -25,8 +25,8 @@ from widgets.des import DESWidget
 from widgets.RSA import RSAWidget
 from widgets.keyXchange import DiffieHellman
 from widgets.digital_sign import DigSignWidget
-from widgets.secret_chat.client.client_widget import ClientWidget
-from widgets.secret_chat.server.server import ServerGUI
+from secret_chat.client.client_widget import ClientWidget
+from secret_chat.server.server import ServerGUI
 
 import random
 

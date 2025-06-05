@@ -1,14 +1,5 @@
-import sys
-import random
-from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QPushButton, QTextEdit, QLabel, QVBoxLayout,
-    QWidget, QLineEdit, QMessageBox, QDialog, QFormLayout, QDialogButtonBox
-)
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
-import asyncio
-import websockets
-
-from widgets.secret_chat.client.key_generation import KeyGenerationDialog
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
+from PyQt6.QtCore import pyqtSignal
 
 
 class LoginWidget(QWidget):
@@ -17,15 +8,14 @@ class LoginWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Вход в чат")
-        self.resize(300, 100)
+        self.resize(300, 150)
 
         layout = QVBoxLayout()
-
         layout.addWidget(QLabel("Введите ваше имя:"))
         self.name_input = QLineEdit()
         layout.addWidget(self.name_input)
 
-        self.connect_button = QPushButton("Подключиться к серверу")
+        self.connect_button = QPushButton("Продолжить")
         self.connect_button.clicked.connect(self.on_login)
         layout.addWidget(self.connect_button)
 
