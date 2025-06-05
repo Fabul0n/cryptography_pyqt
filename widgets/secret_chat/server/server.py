@@ -8,7 +8,8 @@ from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from fastapi import FastAPI, WebSocket
 from uvicorn import Config, Server
 from websockets.exceptions import ConnectionClosed
-
+from sympy import isprime as is_prime, primitive_root, randprime
+import random
 
 class WebSocketServer(QThread):
     message_received = pyqtSignal(str)
@@ -21,6 +22,15 @@ class WebSocketServer(QThread):
         self.message_queue = []
         self.intercept_mode = False
         self.loop = None
+
+    def init_params(self):
+        while True:
+            self.q = randprime(10**30)
+            self.p = 2 * self.q + 1
+            if is_prime(self.p):
+                self.g = primitive_root(self.p)
+                self.r = randprime(2**2047, 2**2048)
+                break
 
     async def websocket_endpoint(self, websocket: WebSocket):
         await websocket.accept()
@@ -48,6 +58,13 @@ class WebSocketServer(QThread):
             self.active_connections.remove(websocket)
             self.message_received.emit("🔌 Клиент отключён")
 
+    async def get_params(self):
+        return {
+            "p": self.p,
+            "g": self.g,
+            "r": self.r
+        }
+
     def run_server(self):
         self.loop = asyncio.new_event_loop()
         config = Config(app=self.app, host="127.0.0.1", port=8000, loop=self.loop)
@@ -56,6 +73,8 @@ class WebSocketServer(QThread):
 
     def run(self):
         self.app.websocket("/ws")(self.websocket_endpoint)
+        self.app.get('/get_params')(self.get_params)
+        self.app.router.route()
         self.run_server()
 
     def send_stored_message(self):
