@@ -3,6 +3,10 @@ import asyncio
 import websockets
 import requests
 from sympy import randprime
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5
+from Crypto.Hash import SHA256
+import base64
 
 
 class WebSocketClient(QObject):
@@ -22,6 +26,21 @@ class WebSocketClient(QObject):
         self.g = None
         self.r = None
         self.a = None
+        self.rsa_key = None
+        self.rsa_public_key = None
+        self.generate_rsa_keys()
+
+    def generate_rsa_keys(self):
+        self.rsa_key = RSA.generate(2048)
+        self.rsa_public_key = self.rsa_key.publickey().export_key()
+        self.chat_window.rsa_public_key = self.rsa_public_key
+        #print(f"{self.username} сгенерировал RSA ключи")
+
+    def sign_message(self, message):
+        h = SHA256.new(message.encode())
+        signer = PKCS1_v1_5.new(self.rsa_key)
+        signature = signer.sign(h)
+        return base64.b64encode(signature).decode()
 
     async def fetch_params(self):
         try:
@@ -33,7 +52,7 @@ class WebSocketClient(QObject):
             self.r = int(params["r"])
             self.chat_window.p = self.p
             self.chat_window.g = self.g
-            print(f"{self.username} получил параметры: p={self.p}, g={self.g}, r={self.r}")
+            #print(f"{self.username} получил параметры: p={self.p}, g={self.g}, r={self.r}")
         except Exception as e:
             self.error_occurred.emit(f"Ошибка получения параметров: {e}")
             raise
@@ -42,7 +61,7 @@ class WebSocketClient(QObject):
         self.a = randprime(2**2047, 2**2048) ^ self.r
         self.chat_window.a = self.a
         self.A = pow(self.g, self.a, self.p)
-        print(f"{self.username} сгенерировал ключи: a={self.a}, A={self.A}")
+        #print(f"{self.username} сгенерировал ключи: a={self.a}, A={self.A}")
 
     async def send_hello(self):
         if self.websocket:
@@ -58,7 +77,7 @@ class WebSocketClient(QObject):
                 await self.send_hello()
                 while True:
                     msg = await websocket.recv()
-                    print(f"{self.username} получил сообщение: {msg}")
+                    #print(f"{self.username} получил сообщение: {msg}")
                     if msg.startswith("__HELLO__:"):
                         try:
                             _, name = msg.split(":", 1)
@@ -67,16 +86,22 @@ class WebSocketClient(QObject):
                             self.error_occurred.emit(f"Некорректный формат HELLO: {e}")
                     elif msg.startswith("__CONNECT_REQUEST__:"):
                         try:
-                            _, from_user, to_user, public_key = msg.split(":", 3)
-                            print(f"{self.username} получил публичный ключ от {from_user}: {public_key}")
-                            self.connect_request_received.emit(from_user, to_user, public_key)
+                            parts = msg.split(":")
+                            if len(parts) != 6:
+                                raise ValueError(f"Некорректный формат CONNECT_REQUEST: {msg}")
+                            _, from_user, to_user, public_key, rsa_public_key, signature = parts
+                            #print(f"{self.username} получил публичный ключ от {from_user}: {public_key}")
+                            self.connect_request_received.emit(from_user, to_user, f"{public_key}:{rsa_public_key}:{signature}")
                         except ValueError as e:
                             self.error_occurred.emit(f"Некорректный формат запроса на подключение: {e}")
                     elif msg.startswith("__CONNECT_RESPONSE__:"):
                         try:
-                            _, from_user, to_user, response, public_key = msg.split(":", 4)
-                            print(f"{self.username} получил публичный ключ от {from_user}: {public_key}")
-                            self.message_received.emit(f"__CONNECT_RESPONSE__:{from_user}:{to_user}:{response}:{public_key}")
+                            parts = msg.split(":")
+                            if len(parts) != 7:
+                                raise ValueError(f"Некорректный формат CONNECT_RESPONSE: {msg}")
+                            _, from_user, to_user, response, public_key, rsa_public_key, signature = parts
+                            #print(f"{self.username} получил публичный ключ от {from_user}: {public_key}")
+                            self.message_received.emit(f"__CONNECT_RESPONSE__:{from_user}:{to_user}:{response}:{public_key}:{rsa_public_key}:{signature}")
                         except ValueError as e:
                             self.error_occurred.emit(f"Некорректный формат ответа на подключение: {e}")
                     else:
@@ -94,3 +119,6 @@ class WebSocketClient(QObject):
 
     def get_public_key(self):
         return self.A
+
+    def get_rsa_public_key(self):
+        return base64.b64encode(self.rsa_public_key).decode()

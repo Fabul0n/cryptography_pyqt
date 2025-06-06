@@ -20,9 +20,9 @@ class WebSocketServer(QThread):
             self.p = 2 * q + 1
             if isprime(self.p):
                 self.g = primitive_root(self.p)
-                self.r = randprime(2**2047, 2**2048)  # Переименовано из a в r
+                self.r = randprime(2**2047, 2**2048)
                 break
-        print(f"Сервер инициализировал параметры: p={self.p}, g={self.g}, r={self.r}")
+        #print(f"Сервер инициализировал параметры: p={self.p}, g={self.g}, r={self.r}")
 
     async def get_params(self):
         return {"p": str(self.p), "g": str(self.g), "r": str(self.r)}
