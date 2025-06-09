@@ -29,10 +29,10 @@ class WebSocketServer(QThread):
 
     async def websocket_endpoint(self, ws: WebSocket):
         await ws.accept()
-        self.message_received.emit("🔌 Клиент подключён")
+        self.message_received.emit("Клиент подключён")
 
         if len(self.connections) >= 2:
-            self.message_received.emit("⚠️ Сервер заполнен, клиент отклонён")
+            self.message_received.emit("Сервер заполнен, клиент отклонён")
             await ws.send_text("Сервер заполнен.")
             await ws.close(code=4000)
             return
@@ -43,15 +43,15 @@ class WebSocketServer(QThread):
             if data.startswith("__HELLO__:"):
                 _, username = data.split(":", 1)
                 self.connections[ws] = username
-                self.message_received.emit(f"👤 Пользователь {username} подключён")
+                self.message_received.emit(f"Пользователь {username} подключён")
             else:
-                self.message_received.emit(f"⚠️ Ожидалось __HELLO__, получено: {data}")
+                self.message_received.emit(f"Ожидалось __HELLO__, получено: {data}")
                 await ws.close(code=4001)
                 return
 
             while True:
                 data = await ws.receive_text()
-                self.message_received.emit(f"📥 Получено от {username}: {data}")
+                self.message_received.emit(f"Получено от {username}: {data}")
 
                 if data.startswith("__CONNECT_REQUEST__:"):
                     try:
@@ -59,13 +59,13 @@ class WebSocketServer(QThread):
                         for conn, name in self.connections.items():
                             if name == to_user and conn != ws:
                                 await conn.send_text(f"__CONNECT_REQUEST__:{from_user}:{to_user}:{public_key}")
-                                self.message_received.emit(f"📤 Запрос на подключение от {from_user} к {to_user} с ключом {public_key}")
+                                self.message_received.emit(f"Запрос на подключение от {from_user} к {to_user} с ключом {public_key}")
                                 break
                         else:
-                            self.message_received.emit(f"⚠️ Пользователь {to_user} не найден")
+                            self.message_received.emit(f"Пользователь {to_user} не найден")
                             await ws.send_text(f"__CONNECT_RESPONSE__:{to_user}:{from_user}:REJECT:0")
                     except ValueError:
-                        self.message_received.emit(f"⚠️ Некорректный формат запроса на подключение: {data}")
+                        self.message_received.emit(f"Некорректный формат запроса на подключение: {data}")
                         continue
 
                 elif data.startswith("__CONNECT_RESPONSE__:"):
@@ -74,14 +74,14 @@ class WebSocketServer(QThread):
                         for conn, name in self.connections.items():
                             if name == to_user and conn != ws:
                                 await conn.send_text(f"__CONNECT_RESPONSE__:{from_user}:{to_user}:{response}:{public_key}")
-                                self.message_received.emit(f"📤 Ответ на подключение от {from_user} к {to_user}: {response} с ключом {public_key}")
+                                self.message_received.emit(f"Ответ на подключение от {from_user} к {to_user}: {response} с ключом {public_key}")
                                 if response == "ACCEPT":
                                     await ws.send_text(f"__CONNECT_SUCCESS__:{to_user}")
                                     await conn.send_text(f"__CONNECT_SUCCESS__:{from_user}")
-                                    self.message_received.emit(f"📤 Успешное подключение между {from_user} и {to_user}")
+                                    self.message_received.emit(f"Успешное подключение между {from_user} и {to_user}")
                                 break
                     except ValueError:
-                        self.message_received.emit(f"⚠️ Некорректный формат ответа на подключение: {data}")
+                        self.message_received.emit(f"Некорректный формат ответа на подключение: {data}")
                         continue
 
                 elif data.startswith("__TO__:"):
@@ -90,23 +90,23 @@ class WebSocketServer(QThread):
                         for conn, name in self.connections.items():
                             if name == target_name and conn != ws:
                                 await conn.send_text(f"{username}:{message}")
-                                self.message_received.emit(f"📤 Сообщение от {username} к {target_name}: {message}")
+                                self.message_received.emit(f"Сообщение от {username} к {target_name}: {message}")
                                 break
                     except ValueError:
-                        self.message_received.emit(f"⚠️ Некорректный формат сообщения: {data}")
+                        self.message_received.emit(f"Некорректный формат сообщения: {data}")
                         continue
 
                 else:
                     for conn in self.connections:
                         if conn != ws:
                             await conn.send_text(f"{username}:{data}")
-                            self.message_received.emit(f"📤 Сообщение от {username} всем: {data}")
+                            self.message_received.emit(f"Сообщение от {username} всем: {data}")
 
         except Exception as e:
             if username:
-                self.message_received.emit(f"🔌 Пользователь {username} отключён: {str(e)}")
+                self.message_received.emit(f"Пользователь {username} отключён: {str(e)}")
             else:
-                self.message_received.emit(f"🔌 Клиент отключён: {str(e)}")
+                self.message_received.emit(f"Клиент отключён: {str(e)}")
             self.connections.pop(ws, None)
 
     def run(self):

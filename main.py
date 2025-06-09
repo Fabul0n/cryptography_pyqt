@@ -11,8 +11,10 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QTextEdit,
     QHBoxLayout,
-    QFrame
+    QFrame,
 )
+import asyncio
+from qasync import QEventLoop
 from widgets.atbash import AtbashWidget
 from widgets.caesar import CaesarWidget
 from widgets.richelieu import RichelieuWidget
@@ -25,18 +27,22 @@ from widgets.des import DESWidget
 from widgets.RSA import RSAWidget
 from widgets.keyXchange import DiffieHellman
 from widgets.digital_sign import DigSignWidget
-from secret_chat.client.client_widget import ClientWidget
-from secret_chat.server.server import ServerGUI
+from secret_chat.client.chat_widget import ChatWidget
+from secret_chat.client.login_widget import LoginWidget
+from secret_chat.server.server_gui import ServerGUI
+import subprocess
 
 import random
 
 
 
 class CipherApp(QMainWindow):
-    def __init__(self):
+    def __init__(self, loop):
         super().__init__()
         self.setWindowTitle("Шифрование")
         self.setGeometry(100, 100, 400, 300)
+
+        self.loop = loop
 
         main_widget = QWidget()
         layout = QHBoxLayout()
@@ -77,11 +83,11 @@ class CipherApp(QMainWindow):
 
         v_layout2.addWidget(QLabel("Секретный чат:"))
 
-        self.secret_chat_client_button = QPushButton("Клиент")
-        self.secret_chat_client_button.clicked.connect(self.secret_chat_client)
-        v_layout2.addWidget(self.secret_chat_client_button)
+        # self.secret_chat_client_button = QPushButton("Клиент")
+        # self.secret_chat_client_button.clicked.connect(self.secret_chat_client)
+        # v_layout2.addWidget(self.secret_chat_client_button)
 
-        self.secret_chat_server_button = QPushButton("Сервер")
+        self.secret_chat_server_button = QPushButton("Секретный чат")
         self.secret_chat_server_button.clicked.connect(self.secret_chat_server)
         v_layout2.addWidget(self.secret_chat_server_button)
 
@@ -91,13 +97,18 @@ class CipherApp(QMainWindow):
         self.setCentralWidget(main_widget)
 
     def secret_chat_client(self):
-        self.secret_chat_cli = ClientWidget()
-        self.close()
+        login_widget = LoginWidget()
+        def on_login_success(username):
+            print("chat")
+            chat_widget = ChatWidget(username, self.loop)
+            chat_widget.show()
+        login_widget.login_successful.connect(on_login_success)
+        login_widget.show()
 
     def secret_chat_server(self):
-        self.secret_chat_srvr = ServerGUI()
-        self.secret_chat_srvr.show()
-        self.close()
+        subprocess.run(['python3', './secret_chat.py'])
+        # self.secret_chat_srvr = ServerGUI()
+        # self.secret_chat_srvr.show()
 
     def show_cipher_window(self):
         cipher_name = self.cipher_combo.currentText()
@@ -137,6 +148,7 @@ class CipherApp(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = CipherApp()
+    loop = QEventLoop(app)
+    window = CipherApp(loop)
     window.show()
     sys.exit(app.exec())
